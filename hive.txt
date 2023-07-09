@@ -1,0 +1,123 @@
+ssh root@hpcsa06
+chsh -s hive
+su - hive
+hive
+!connect jdbc:hive2://localhost:10000/default
+hive
+oNlmMyvmCs
+---Deleting
+show tables;
+drop table trupti;
+----Managed table
+create managed table trupti(id int,name string);
+----as ORC
+create table trupti(id int,name string) stored as ORC;
+---as parquet
+create table trupti(id int,name string) stored as parquet;
+---as txtfile
+create table trupti(id int,name string) stored as parquet;
+---creating External table
+hdfs#hdfs dfs -mkdir /user/hive/trupti
+root#vi tab1.txt
+1	nisha
+2	aasha
+3	usha
+create external table trupti(id int, name string) row format delimited fields terminated by '\t' location '/user/hive/trupti';
+---desplay table content
+select * from trupti;
+---desplaying format of table
+desc trupti;
+desc formatted trupti;
+---
+sudo -u hdfs hadoop fs -chown root /user/hive
+hdfs dfs -mkdir /user/hive/trupti
+sudo -u hdfs hadoop fs -chown root /user/hive/trupti
+hdfs dfs -ls /user/hive
+hdfs dfs -put /root/tab1.txt /user/hive/trupti
+hdfs dfs -ls /user/hive/trupti
+---partition table
+create table city1(id int, name string) partitioned by (pincode int) row format delimited fields terminated by'\t' stored as textfile;
+---All datanode details
+hdfs dfsadmin -report
+---To check status of file system not corrupted
+hadoop fsck /user/
+---Delete corrupted files
+hadoop fsck delete
+---To see databases
+show databases
+---Deleting data from table
+delete from table data1 where id = 1;
+---#YARN-WORDCOUNT#---
+wget https://raw.githubusercontent.com/HortonworksUniversity/Ops_Labs/master/const.txt
+hdfs dfs -put const.txt /user/root
+hdfs dfs -chown root:root /user/root
+sudo -u hdfs hadoop fs -chown root /user/root
+hdfs dfs -ls /user/root
+cd /opt/cloudera/parcels/CDH/lib/hadoop-mapreduce/
+ls -lrt | grep -i example
+yarn jar ./hadoop-mapreduce-examples.jar wordcount /user/root/const.txt /user/root/result
+hdfs dfs -ls /user/root/result
+hdfs dfs -cat /user/root/result/part-r-00000
+---#Snapshot#---
+su - hdfs
+hdfs dfsadmin -allowSnapshot /user/root
+exit
+hdfs dfs -ls /user/root/.snapshot
+hdfs dfs -createSnapshot /user/root
+hdfs dfs -renameSnapshot /user/root s<yyyymmdd-hhmmss.sss> mysnap
+hdfs dfs -ls /user/root/.snapshot/mysnap
+hdfs dfs -ls /user/root
+----snapshot
+hadoop fs -mkdir -p /user/hive/warehouse
+hadoop fs -mkdir /tmp
+hadoop fs -chmod -R 777 /user/hive
+su - hdfs
+hadoop fs -chmod 777 /tmp
+hdfs dfs -mkdir /tmp/mytest
+hdfs dfs -ls /tmp
+hdfs dfs -ls /tmp/mytesting/config.ini /tmp/mytest
+hdfs dfs -cp /user/hdfs/config.ini /tmp/mytest
+hdfs dfs -ls /tmp/mytest
+hdfs-file browser-enable snapshot-enable snap-close-take snap-snap1-ok-close
+hdfs dfs -ls /tmp/mytest/.snapshot/snap1
+hdfs dfs -cp /user/hdfs/config.ini1 /tmp/mytes
+delete snap1-take snapshot-snap2
+hdfs dfs -ls /tmp/mytes/.snapshot/snap2
+Delete---hdfs dfs -deleteSnapshot /tmp/mytes/ snap2
+-----#Spark#-----
+hdfs dfs -mkdir /spark
+hdfs dfs -mkdir /user/spark
+hdfs dfs -cp /user/root/const.txt /spark
+hdfs dfs -ls /spark
+spark-shell
+vi data.txt
+hdfs dfs -mkdir /user/spark
+hdfs dfs -cp /user/root/const.txt /spark
+hdfs dfs -ls /spark
+spark-shell
+ctrl+c
+su - root
+vi data.txt
+>www.google.com
+www.redhat.com
+www.google.com
+www.redhat.com
+www.cdac.in
+
+su - hdfs
+hdfs dfs -chmod 777 /user/spark
+hdfs dfs -ls /user/spark
+hdfs dfs -put /root/data.txt /user/spark/
+spark-shell
+scala>val data=sc.textFile("data.txt")
+data.collect;
+val splitdata = data.flatMap(line => line.split(" "));
+splitdata.collect;
+val mapdata = splitdata.map(word => (word,1));
+mapdata.collect;
+val reducedata = mapdata.reduceByKey(_+_);
+reducedata.collect;
+
+---
+telnet localhost:10000
+
